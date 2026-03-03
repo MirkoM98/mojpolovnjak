@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Heart, Share2, MapPin, Calendar, Gauge, Fuel,
   Settings, Palette, DoorOpen, Zap, Phone, MessageCircle, User,
@@ -9,15 +9,18 @@ import { carsAPI } from '../services/api'
 import { normalizeCar, normalizeCars } from '../utils/normalize'
 import CarCard from '../components/cars/CarCard'
 import { formatPrice, formatMileage, timeAgo } from '../utils/formatters'
+import { useAuth } from '../context/AuthContext'
 
 export default function CarDetail() {
   const { id } = useParams()
+  const navigate = useNavigate()
+  const { user, toggleFavorite, isFavorite } = useAuth()
   const [car, setCar] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [liked, setLiked] = useState(false)
   const [showPhone, setShowPhone] = useState(false)
   const [currentImage, setCurrentImage] = useState(0)
   const [similarCars, setSimilarCars] = useState([])
+  const liked = isFavorite(Number(id))
 
   useEffect(() => {
     setLoading(true)
@@ -94,7 +97,7 @@ export default function CarDetail() {
                 </>
               )}
               <div className="absolute top-3 right-3 flex gap-2">
-                <button onClick={() => setLiked(!liked)} className={`p-2.5 rounded-full backdrop-blur-sm border-0 cursor-pointer ${liked ? 'bg-red-500 text-white' : 'bg-white/90 text-gray-600 hover:text-red-500'}`}>
+                <button onClick={() => { if (!user) { navigate('/prijava'); return } toggleFavorite(Number(id)) }} className={`p-2.5 rounded-full backdrop-blur-sm border-0 cursor-pointer ${liked ? 'bg-red-500 text-white' : 'bg-white/90 text-gray-600 hover:text-red-500'}`}>
                   <Heart size={20} fill={liked ? 'currentColor' : 'none'} />
                 </button>
                 <button className="p-2.5 rounded-full bg-white/90 text-gray-600 border-0 cursor-pointer hover:text-primary-600">

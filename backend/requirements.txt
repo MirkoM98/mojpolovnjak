@@ -9,5 +9,6 @@ bcrypt==4.2.1
 python-multipart
 python-dotenv
 boto3
+cloudinary
 pydantic[email]
 pydantic-settings

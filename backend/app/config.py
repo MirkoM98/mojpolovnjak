@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     aws_bucket_name: str = "mojpolovnjak-images"
     aws_region: str = "eu-central-1"
 
+    cloudinary_cloud_name: str = ""
+    cloudinary_api_key: str = ""
+    cloudinary_api_secret: str = ""
+
     class Config:
         env_file = ".env"
 

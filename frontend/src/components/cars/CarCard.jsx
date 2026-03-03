@@ -1,10 +1,12 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Heart, MapPin, Calendar, Gauge, Fuel, Settings } from 'lucide-react'
-import { useState } from 'react'
 import { formatPrice, formatMileage, timeAgo } from '../../utils/formatters'
+import { useAuth } from '../../context/AuthContext'
 
 export default function CarCard({ car }) {
-  const [liked, setLiked] = useState(false)
+  const { user, toggleFavorite, isFavorite } = useAuth()
+  const navigate = useNavigate()
+  const liked = isFavorite(car.id)
 
   return (
     <Link
@@ -22,7 +24,8 @@ export default function CarCard({ car }) {
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
-            setLiked(!liked)
+            if (!user) { navigate('/prijava'); return }
+            toggleFavorite(car.id)
           }}
           className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-colors border-0 cursor-pointer ${
             liked ? 'bg-red-500 text-white' : 'bg-white/80 text-gray-600 hover:bg-white hover:text-red-500'
