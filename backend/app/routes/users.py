@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 from sqlalchemy.orm import Session, joinedload
 from typing import List
 from ..database import get_db
 from ..models.user import User
 from ..models.car import Car, Favorite
-from ..schemas.user import UserResponse, UserUpdate
+from ..schemas.user import UserResponse, UserUpdate, PublicUserResponse
 from ..schemas.car import CarResponse
 from ..services.auth import get_current_user
+from ..services.s3 import upload_image
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
@@ -101,3 +102,39 @@ def remove_favorite(
 
     db.delete(favorite)
     db.commit()
+
+
+@router.post("/me/cover-image", response_model=UserResponse)
+async def upload_cover_image(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if not file.content_type or not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Samo slike su dozvoljene")
+
+    image_url = await upload_image(file)
+    current_user.cover_image_url = image_url
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+@router.get("/{user_id}", response_model=PublicUserResponse)
+def get_public_profile(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Korisnik nije pronađen")
+    return user
+
+
+@router.get("/{user_id}/cars", response_model=List[CarResponse])
+def get_user_cars(user_id: int, db: Session = Depends(get_db)):
+    cars = db.query(Car).options(
+        joinedload(Car.images),
+        joinedload(Car.seller),
+    ).filter(
+        Car.seller_id == user_id,
+        Car.status == "active",
+    ).order_by(Car.created_at.desc()).all()
+    return cars

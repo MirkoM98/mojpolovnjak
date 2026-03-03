@@ -51,6 +51,12 @@ export const usersAPI = {
   getFavorites: () => api.get('/users/me/favorites'),
   addFavorite: (carId) => api.post(`/users/me/favorites/${carId}`),
   removeFavorite: (carId) => api.delete(`/users/me/favorites/${carId}`),
+  uploadCoverImage: (formData) =>
+    api.post('/users/me/cover-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  getPublicProfile: (userId) => api.get(`/users/${userId}`),
+  getUserCars: (userId) => api.get(`/users/${userId}/cars`),
 }
 
 export const adminAPI = {

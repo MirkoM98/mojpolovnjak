@@ -1,4 +1,5 @@
 import os
+from sqlalchemy import text, inspect
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -7,6 +8,23 @@ from .routes import admin, auth, cars, users
 from .seed_data import seed_if_empty
 
 Base.metadata.create_all(bind=engine)
+
+
+def _migrate():
+    """Add new columns to existing tables if they don't exist yet."""
+    inspector = inspect(engine)
+    user_cols = {c["name"] for c in inspector.get_columns("users")}
+    additions = {
+        "bio": "VARCHAR",
+        "cover_image_url": "VARCHAR",
+    }
+    with engine.begin() as conn:
+        for col, col_type in additions.items():
+            if col not in user_cols:
+                conn.execute(text(f'ALTER TABLE users ADD COLUMN {col} {col_type}'))
+
+
+_migrate()
 
 db = SessionLocal()
 try:

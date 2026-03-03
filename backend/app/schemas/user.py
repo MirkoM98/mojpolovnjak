@@ -21,7 +21,22 @@ class UserResponse(BaseModel):
     name: str
     phone: Optional[str] = None
     avatar_url: Optional[str] = None
+    bio: Optional[str] = None
+    cover_image_url: Optional[str] = None
     is_admin: bool = False
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class PublicUserResponse(BaseModel):
+    id: int
+    name: str
+    phone: Optional[str] = None
+    avatar_url: Optional[str] = None
+    bio: Optional[str] = None
+    cover_image_url: Optional[str] = None
     created_at: datetime
 
     class Config:
@@ -32,6 +47,7 @@ class UserUpdate(BaseModel):
     name: Optional[str] = None
     phone: Optional[str] = None
     avatar_url: Optional[str] = None
+    bio: Optional[str] = None
 
 
 class Token(BaseModel):

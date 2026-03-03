@@ -200,15 +200,15 @@ export default function CarDetail() {
 
             <div className="bg-white rounded-xl border border-gray-100 p-6">
               <h3 className="font-semibold text-gray-900 mb-4">Prodavac</h3>
-              <div className="flex items-center gap-3 mb-4">
+              <Link to={`/prodavac/${car.seller.id}`} className="flex items-center gap-3 mb-4 no-underline group">
                 <div className="w-12 h-12 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center">
                   <User size={24} />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900 m-0">{car.seller.name}</p>
+                  <p className="font-medium text-gray-900 m-0 group-hover:text-primary-600 transition-colors">{car.seller.name}</p>
                   <p className="text-sm text-gray-500 m-0">{car.location}</p>
                 </div>
-              </div>
+              </Link>
               <div className="space-y-3">
                 {showPhone && car.seller.phone ? (
                   <a href={`tel:${car.seller.phone}`} className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 no-underline transition-colors">

@@ -13,6 +13,8 @@ class User(Base):
     name = Column(String, nullable=False)
     phone = Column(String, nullable=True)
     avatar_url = Column(String, nullable=True)
+    bio = Column(String, nullable=True)
+    cover_image_url = Column(String, nullable=True)
     is_admin = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
