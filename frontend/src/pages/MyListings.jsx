@@ -3,7 +3,7 @@ import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { usersAPI, carsAPI } from '../services/api'
 import { normalizeCars } from '../utils/normalize'
-import { PlusCircle, Edit, Trash2, Eye, Loader2 } from 'lucide-react'
+import { PlusCircle, Pencil, Trash2, Eye, Loader2 } from 'lucide-react'
 import { formatPrice, formatMileage, timeAgo } from '../utils/formatters'
 
 export default function MyListings() {
@@ -65,6 +65,9 @@ export default function MyListings() {
                 <div className="flex sm:flex-col gap-2 shrink-0">
                   <Link to={`/automobili/${car.id}`} className="flex items-center gap-1.5 px-3 py-2 bg-gray-50 text-gray-700 rounded-lg text-sm no-underline hover:bg-gray-100 transition-colors">
                     <Eye size={14} /> Pogledaj
+                  </Link>
+                  <Link to={`/edit-oglas/${car.id}`} className="flex items-center gap-1.5 px-3 py-2 bg-primary-50 text-primary-600 rounded-lg text-sm no-underline hover:bg-primary-100 transition-colors">
+                    <Pencil size={14} /> Izmeni
                   </Link>
                   <button onClick={() => handleDelete(car.id)} className="flex items-center gap-1.5 px-3 py-2 bg-red-50 text-red-600 rounded-lg text-sm border-0 cursor-pointer hover:bg-red-100 transition-colors">
                     <Trash2 size={14} /> Obriši

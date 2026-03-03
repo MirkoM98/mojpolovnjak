@@ -51,4 +51,12 @@ export const usersAPI = {
   removeFavorite: (carId) => api.delete(`/users/me/favorites/${carId}`),
 }
 
+export const adminAPI = {
+  getUsers: () => api.get('/admin/users'),
+  makeAdmin: (email) => api.put('/admin/users/make-admin', null, { params: { email } }),
+  removeAdmin: (userId) => api.put(`/admin/users/${userId}/remove-admin`),
+  getCars: (params) => api.get('/admin/cars', { params }),
+  deleteCar: (id) => api.delete(`/admin/cars/${id}`),
+}
+
 export default api

@@ -133,7 +133,7 @@ def update_car(
     car = db.query(Car).filter(Car.id == car_id).first()
     if not car:
         raise HTTPException(status_code=404, detail="Oglas nije pronađen")
-    if car.seller_id != current_user.id:
+    if car.seller_id != current_user.id and not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Nemate dozvolu za izmenu ovog oglasa")
 
     update_data = car_data.model_dump(exclude_unset=True)
@@ -160,7 +160,7 @@ def delete_car(
     car = db.query(Car).filter(Car.id == car_id).first()
     if not car:
         raise HTTPException(status_code=404, detail="Oglas nije pronađen")
-    if car.seller_id != current_user.id:
+    if car.seller_id != current_user.id and not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Nemate dozvolu za brisanje ovog oglasa")
 
     db.delete(car)
@@ -177,7 +177,7 @@ async def upload_car_images(
     car = db.query(Car).filter(Car.id == car_id).first()
     if not car:
         raise HTTPException(status_code=404, detail="Oglas nije pronađen")
-    if car.seller_id != current_user.id:
+    if car.seller_id != current_user.id and not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Nemate dozvolu")
 
     existing_count = db.query(CarImage).filter(CarImage.car_id == car_id).count()

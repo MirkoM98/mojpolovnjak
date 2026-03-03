@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { Car, Menu, X, User, LogOut, Heart, PlusCircle, List } from 'lucide-react'
+import { Car, Menu, X, User, LogOut, Heart, PlusCircle, List, Shield } from 'lucide-react'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
@@ -75,6 +75,11 @@ export default function Navbar() {
                       <Link to="/novi-oglas" onClick={() => setProfileOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 no-underline">
                         <PlusCircle size={16} /> Novi oglas
                       </Link>
+                      {user.is_admin && (
+                        <Link to="/admin" onClick={() => setProfileOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm text-purple-700 hover:bg-purple-50 no-underline">
+                          <Shield size={16} /> Admin panel
+                        </Link>
+                      )}
                       <hr className="my-1 border-gray-100" />
                       <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full border-0 bg-transparent cursor-pointer">
                         <LogOut size={16} /> Odjavi se
@@ -124,6 +129,11 @@ export default function Navbar() {
                 <Link to="/favoriti" onClick={() => setMobileOpen(false)} className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg no-underline">
                   Favoriti
                 </Link>
+                {user.is_admin && (
+                  <Link to="/admin" onClick={() => setMobileOpen(false)} className="block px-4 py-2 text-purple-700 hover:bg-purple-50 rounded-lg no-underline font-medium">
+                    Admin panel
+                  </Link>
+                )}
                 <button onClick={() => { handleLogout(); setMobileOpen(false) }} className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg border-0 bg-transparent cursor-pointer">
                   Odjavi se
                 </button>

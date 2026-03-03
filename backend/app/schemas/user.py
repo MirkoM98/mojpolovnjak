@@ -21,6 +21,7 @@ class UserResponse(BaseModel):
     name: str
     phone: Optional[str] = None
     avatar_url: Optional[str] = None
+    is_admin: bool = False
     created_at: datetime
 
     class Config:

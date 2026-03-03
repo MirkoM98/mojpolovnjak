@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from .database import engine, Base, SessionLocal
-from .routes import auth, cars, users
+from .routes import admin, auth, cars, users
 from .seed_data import seed_if_empty
 
 Base.metadata.create_all(bind=engine)
@@ -35,6 +35,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(admin.router)
 app.include_router(auth.router)
 app.include_router(cars.router)
 app.include_router(users.router)

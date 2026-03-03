@@ -10,6 +10,8 @@ import Profile from './pages/Profile'
 import MyListings from './pages/MyListings'
 import Favorites from './pages/Favorites'
 import CreateListing from './pages/CreateListing'
+import EditListing from './pages/EditListing'
+import Admin from './pages/Admin'
 
 export default function App() {
   return (
@@ -25,6 +27,8 @@ export default function App() {
           <Route path="/moji-oglasi" element={<MyListings />} />
           <Route path="/favoriti" element={<Favorites />} />
           <Route path="/novi-oglas" element={<CreateListing />} />
+          <Route path="/edit-oglas/:id" element={<EditListing />} />
+          <Route path="/admin" element={<Admin />} />
         </Route>
       </Routes>
     </AuthProvider>
