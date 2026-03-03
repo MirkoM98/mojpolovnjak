@@ -215,11 +215,12 @@ def set_primary_image(
     db.query(CarImage).filter(CarImage.car_id == car_id).update({"is_primary": 0})
     image.is_primary = 1
     db.commit()
+    db.expire_all()
 
     car = db.query(Car).options(
         joinedload(Car.images),
         joinedload(Car.seller),
-    ).filter(Car.id == car.id).first()
+    ).filter(Car.id == car_id).first()
     return car
 
 

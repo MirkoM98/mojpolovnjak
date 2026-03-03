@@ -109,7 +109,7 @@ export default function EditListing() {
         await carsAPI.uploadImages(id, formData)
       }
 
-      navigate(user.is_admin ? '/admin' : '/moji-oglasi')
+      navigate(`/automobili/${id}`)
     } catch (err) {
       setError(err.response?.data?.detail || 'Greška pri ažuriranju oglasa')
     } finally {
