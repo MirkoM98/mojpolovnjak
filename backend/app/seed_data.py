@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from .models.user import User
 from .models.car import Car, CarImage
-from .services.auth import hash_password
+from .services.auth import get_password_hash
 
 
 def seed_if_empty(db: Session):
@@ -12,7 +12,7 @@ def seed_if_empty(db: Session):
     if not demo_user:
         demo_user = User(
             email="demo@mojpolovnjak.autos",
-            hashed_password=hash_password("demo1234"),
+            hashed_password=get_password_hash("demo1234"),
             name="MojPolovnjak Tim",
             phone="+381 64 123 4567",
         )
