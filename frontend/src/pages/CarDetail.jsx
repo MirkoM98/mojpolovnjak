@@ -2,7 +2,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Heart, Share2, MapPin, Calendar, Gauge, Fuel,
   Settings, Palette, DoorOpen, Zap, Phone, MessageCircle, User,
-  Check, ChevronLeft, ChevronRight, Loader2,
+  Check, ChevronLeft, ChevronRight, Loader2, Pencil,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { carsAPI } from '../services/api'
@@ -23,6 +23,7 @@ export default function CarDetail() {
   const [animating, setAnimating] = useState(false)
   const [similarCars, setSimilarCars] = useState([])
   const liked = isFavorite(Number(id))
+  const canEdit = user && car && (user.is_admin || user.id === car.seller?.id)
 
   const goToImage = (direction) => {
     if (animating || !car) return
@@ -138,7 +139,14 @@ export default function CarDetail() {
           </div>
 
           <div className="lg:hidden">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">{car.title}</h1>
+            <div className="flex items-start justify-between gap-3">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">{car.title}</h1>
+              {canEdit && (
+                <Link to={`/edit-oglas/${car.id}`} className="shrink-0 flex items-center gap-1.5 bg-primary-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium no-underline hover:bg-primary-700 transition-colors">
+                  <Pencil size={14} /> Izmeni
+                </Link>
+              )}
+            </div>
             <p className="text-3xl font-bold text-primary-600 mb-4">{formatPrice(car.price)}</p>
           </div>
 
@@ -182,7 +190,14 @@ export default function CarDetail() {
         <div className="lg:col-span-1">
           <div className="sticky top-20 space-y-4">
             <div className="hidden lg:block bg-white rounded-xl border border-gray-100 p-6">
-              <h1 className="text-xl font-bold text-gray-900 mb-2">{car.title}</h1>
+              <div className="flex items-start justify-between gap-2">
+                <h1 className="text-xl font-bold text-gray-900 mb-2">{car.title}</h1>
+                {canEdit && (
+                  <Link to={`/edit-oglas/${car.id}`} className="shrink-0 flex items-center gap-1.5 bg-primary-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium no-underline hover:bg-primary-700 transition-colors">
+                    <Pencil size={14} /> Izmeni
+                  </Link>
+                )}
+              </div>
               <p className="text-3xl font-bold text-primary-600 mb-1">{formatPrice(car.price)}</p>
               <div className="flex items-center gap-1 text-gray-400 text-sm">
                 <MapPin size={14} />
