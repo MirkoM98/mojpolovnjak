@@ -38,5 +38,5 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
             detail="Pogrešan email ili lozinka",
         )
 
-    access_token = create_access_token(data={"sub": user.id})
+    access_token = create_access_token(data={"sub": str(user.id)})
     return {"access_token": access_token, "token_type": "bearer"}
