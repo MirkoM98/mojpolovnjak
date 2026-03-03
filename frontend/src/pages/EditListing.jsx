@@ -17,6 +17,7 @@ export default function EditListing() {
   const [error, setError] = useState('')
   const [newImages, setNewImages] = useState([])
   const [existingImages, setExistingImages] = useState([])
+  const [carStatus, setCarStatus] = useState('active')
   const [form, setForm] = useState({
     brand: '', model: '', year: '', price: '', mileage: '',
     fuel: '', transmission: '', horsepower: '', engine_size: '',
@@ -43,6 +44,7 @@ export default function EditListing() {
           location: car.location || '',
           description: car.description || '',
         })
+        setCarStatus(car.status || 'active')
         setExistingImages(car.images || [])
       })
       .catch(() => setError('Oglas nije pronađen'))
@@ -99,6 +101,7 @@ export default function EditListing() {
         horsepower: form.horsepower ? Number(form.horsepower) : null,
         engine_size: form.engine_size ? Number(form.engine_size) : null,
         doors: Number(form.doors),
+        status: carStatus,
       }
 
       await carsAPI.update(id, carData)
@@ -131,6 +134,32 @@ export default function EditListing() {
         {error && (
           <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg border border-red-100">{error}</div>
         )}
+
+        <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <h2 className="font-semibold text-gray-900 mb-4">Status oglasa</h2>
+          <div className="flex flex-wrap gap-3">
+            {[
+              { value: 'active', label: 'Aktivan', color: 'bg-green-50 border-green-300 text-green-700', active: 'bg-green-600 border-green-600 text-white' },
+              { value: 'reserved', label: 'Rezervisan', color: 'bg-amber-50 border-amber-300 text-amber-700', active: 'bg-amber-500 border-amber-500 text-white' },
+              { value: 'sold', label: 'Prodat', color: 'bg-red-50 border-red-300 text-red-700', active: 'bg-red-600 border-red-600 text-white' },
+            ].map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setCarStatus(opt.value)}
+                className={`px-5 py-2.5 rounded-lg font-medium text-sm border cursor-pointer transition-all ${carStatus === opt.value ? opt.active : opt.color}`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          {carStatus === 'sold' && (
+            <p className="text-sm text-red-600 mt-2 m-0">Oglas će biti označen kao prodat i neće se prikazivati u pretrazi.</p>
+          )}
+          {carStatus === 'reserved' && (
+            <p className="text-sm text-amber-600 mt-2 m-0">Oglas će biti označen kao rezervisan i neće se prikazivati u pretrazi.</p>
+          )}
+        </div>
 
         <div className="bg-white rounded-xl border border-gray-100 p-6">
           <h2 className="font-semibold text-gray-900 mb-4">Fotografije</h2>

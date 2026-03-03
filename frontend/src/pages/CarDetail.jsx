@@ -2,7 +2,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Heart, Share2, MapPin, Calendar, Gauge, Fuel,
   Settings, Palette, DoorOpen, Zap, Phone, MessageCircle, User,
-  Check, ChevronLeft, ChevronRight, Loader2, Pencil,
+  Check, ChevronLeft, ChevronRight, Loader2, Pencil, Ban, Clock,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { carsAPI } from '../services/api'
@@ -84,9 +84,26 @@ export default function CarDetail() {
   ]
 
   const mainImage = car.images[currentImage] || 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600&h=400&fit=crop'
+  const isSold = car.status === 'sold'
+  const isReserved = car.status === 'reserved'
+  const isInactive = isSold || isReserved
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {isInactive && (
+        <div className={`mb-6 rounded-xl p-4 flex items-center gap-3 ${isSold ? 'bg-red-50 border border-red-200' : 'bg-amber-50 border border-amber-200'}`}>
+          {isSold ? <Ban size={20} className="text-red-600 shrink-0" /> : <Clock size={20} className="text-amber-600 shrink-0" />}
+          <div>
+            <p className={`font-semibold m-0 ${isSold ? 'text-red-800' : 'text-amber-800'}`}>
+              {isSold ? 'Ovo vozilo je prodato' : 'Ovo vozilo je rezervisano'}
+            </p>
+            <p className={`text-sm m-0 ${isSold ? 'text-red-600' : 'text-amber-600'}`}>
+              {isSold ? 'Ovaj oglas više nije aktivan.' : 'Vozilo je trenutno rezervisano i nije dostupno za kupovinu.'}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center gap-2 mb-6">
         <Link to="/automobili" className="flex items-center gap-1 text-gray-500 hover:text-primary-600 text-sm no-underline">
           <ArrowLeft size={16} /> Svi automobili
@@ -127,25 +144,39 @@ export default function CarDetail() {
                   </div>
                 </>
               )}
-              <div className="absolute top-3 right-3 flex gap-2">
+              {isInactive && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+                  <div className={`px-8 py-4 rounded-2xl ${isSold ? 'bg-red-600' : 'bg-amber-500'} text-white text-center`}>
+                    {isSold ? <Ban size={40} className="mx-auto mb-2" /> : <Clock size={40} className="mx-auto mb-2" />}
+                    <span className="text-2xl font-bold uppercase tracking-wider">
+                      {isSold ? 'Prodato' : 'Rezervisano'}
+                    </span>
+                  </div>
+                </div>
+              )}
+              <div className="absolute top-3 right-3 flex gap-2 z-20">
                 {canEdit && (
                   <Link to={`/edit-oglas/${car.id}`} className="p-2.5 rounded-full bg-purple-600 text-white border-0 cursor-pointer hover:bg-purple-700 transition-colors flex items-center justify-center no-underline">
                     <Pencil size={20} />
                   </Link>
                 )}
-                <button onClick={() => { if (!user) { navigate('/prijava'); return } toggleFavorite(Number(id)) }} className={`p-2.5 rounded-full backdrop-blur-sm border-0 cursor-pointer ${liked ? 'bg-red-500 text-white' : 'bg-white/90 text-gray-600 hover:text-red-500'}`}>
-                  <Heart size={20} fill={liked ? 'currentColor' : 'none'} />
-                </button>
-                <button className="p-2.5 rounded-full bg-white/90 text-gray-600 border-0 cursor-pointer hover:text-primary-600">
-                  <Share2 size={20} />
-                </button>
+                {!isInactive && (
+                  <>
+                    <button onClick={() => { if (!user) { navigate('/prijava'); return } toggleFavorite(Number(id)) }} className={`p-2.5 rounded-full backdrop-blur-sm border-0 cursor-pointer ${liked ? 'bg-red-500 text-white' : 'bg-white/90 text-gray-600 hover:text-red-500'}`}>
+                      <Heart size={20} fill={liked ? 'currentColor' : 'none'} />
+                    </button>
+                    <button className="p-2.5 rounded-full bg-white/90 text-gray-600 border-0 cursor-pointer hover:text-primary-600">
+                      <Share2 size={20} />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
           <div className="lg:hidden">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">{car.title}</h1>
-            <p className="text-3xl font-bold text-primary-600 mb-4">{formatPrice(car.price)}</p>
+            <p className={`text-3xl font-bold mb-4 ${isSold ? 'text-gray-400 line-through' : 'text-primary-600'}`}>{formatPrice(car.price)}</p>
           </div>
 
           <div className="bg-white rounded-xl border border-gray-100 p-6">
@@ -189,7 +220,7 @@ export default function CarDetail() {
           <div className="sticky top-20 space-y-4">
             <div className="hidden lg:block bg-white rounded-xl border border-gray-100 p-6">
               <h1 className="text-xl font-bold text-gray-900 mb-2">{car.title}</h1>
-              <p className="text-3xl font-bold text-primary-600 mb-1">{formatPrice(car.price)}</p>
+              <p className={`text-3xl font-bold mb-1 ${isSold ? 'text-gray-400 line-through' : 'text-primary-600'}`}>{formatPrice(car.price)}</p>
               <div className="flex items-center gap-1 text-gray-400 text-sm">
                 <MapPin size={14} />
                 <span>{car.location}</span>
@@ -209,20 +240,26 @@ export default function CarDetail() {
                   <p className="text-sm text-gray-500 m-0">{car.location}</p>
                 </div>
               </Link>
-              <div className="space-y-3">
-                {showPhone && car.seller.phone ? (
-                  <a href={`tel:${car.seller.phone}`} className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 no-underline transition-colors">
-                    <Phone size={18} />{car.seller.phone}
-                  </a>
-                ) : (
-                  <button onClick={() => setShowPhone(true)} className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 border-0 cursor-pointer transition-colors">
-                    <Phone size={18} />Prikaži broj telefona
+              {isInactive ? (
+                <div className={`text-center py-3 rounded-xl font-medium ${isSold ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-amber-50 text-amber-600 border border-amber-200'}`}>
+                  {isSold ? 'Vozilo je prodato' : 'Vozilo je rezervisano'}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {showPhone && car.seller.phone ? (
+                    <a href={`tel:${car.seller.phone}`} className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 no-underline transition-colors">
+                      <Phone size={18} />{car.seller.phone}
+                    </a>
+                  ) : (
+                    <button onClick={() => setShowPhone(true)} className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-3 rounded-xl font-medium hover:bg-green-700 border-0 cursor-pointer transition-colors">
+                      <Phone size={18} />Prikaži broj telefona
+                    </button>
+                  )}
+                  <button className="w-full flex items-center justify-center gap-2 bg-primary-600 text-white py-3 rounded-xl font-medium hover:bg-primary-700 border-0 cursor-pointer transition-colors">
+                    <MessageCircle size={18} />Pošalji poruku
                   </button>
-                )}
-                <button className="w-full flex items-center justify-center gap-2 bg-primary-600 text-white py-3 rounded-xl font-medium hover:bg-primary-700 border-0 cursor-pointer transition-colors">
-                  <MessageCircle size={18} />Pošalji poruku
-                </button>
-              </div>
+                </div>
+              )}
             </div>
 
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">

@@ -135,6 +135,6 @@ def get_user_cars(user_id: int, db: Session = Depends(get_db)):
         joinedload(Car.seller),
     ).filter(
         Car.seller_id == user_id,
-        Car.status == "active",
+        Car.status.in_(["active", "reserved"]),
     ).order_by(Car.created_at.desc()).all()
     return cars

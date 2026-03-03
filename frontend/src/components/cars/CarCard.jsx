@@ -18,21 +18,33 @@ export default function CarCard({ car }) {
         <img
           src={car.images[0]}
           alt={car.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${car.status === 'sold' ? 'grayscale opacity-70' : ''}`}
         />
-        <button
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            if (!user) { navigate('/prijava'); return }
-            toggleFavorite(car.id)
-          }}
-          className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-colors border-0 cursor-pointer ${
-            liked ? 'bg-red-500 text-white' : 'bg-white/80 text-gray-600 hover:bg-white hover:text-red-500'
-          }`}
-        >
-          <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
-        </button>
+        {car.status === 'sold' && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+            <span className="bg-red-600 text-white text-sm font-bold px-4 py-1.5 rounded-lg uppercase tracking-wider">Prodato</span>
+          </div>
+        )}
+        {car.status === 'reserved' && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+            <span className="bg-amber-500 text-white text-sm font-bold px-4 py-1.5 rounded-lg uppercase tracking-wider">Rezervisano</span>
+          </div>
+        )}
+        {car.status !== 'sold' && (
+          <button
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              if (!user) { navigate('/prijava'); return }
+              toggleFavorite(car.id)
+            }}
+            className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-colors border-0 cursor-pointer ${
+              liked ? 'bg-red-500 text-white' : 'bg-white/80 text-gray-600 hover:bg-white hover:text-red-500'
+            }`}
+          >
+            <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
+          </button>
+        )}
         <div className="absolute bottom-3 left-3">
           <span className="bg-primary-600 text-white text-xs font-semibold px-2.5 py-1 rounded-md">
             {car.bodyType}
@@ -48,7 +60,7 @@ export default function CarCard({ car }) {
           </h3>
         </div>
 
-        <p className="text-2xl font-bold text-primary-600 m-0 mb-3">
+        <p className={`text-2xl font-bold m-0 mb-3 ${car.status === 'sold' ? 'text-gray-400 line-through' : 'text-primary-600'}`}>
           {formatPrice(car.price)}
         </p>
 
