@@ -167,6 +167,62 @@ def delete_car(
     db.commit()
 
 
+@router.delete("/{car_id}/images/{image_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_car_image(
+    car_id: int,
+    image_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    car = db.query(Car).filter(Car.id == car_id).first()
+    if not car:
+        raise HTTPException(status_code=404, detail="Oglas nije pronađen")
+    if car.seller_id != current_user.id and not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Nemate dozvolu")
+
+    image = db.query(CarImage).filter(CarImage.id == image_id, CarImage.car_id == car_id).first()
+    if not image:
+        raise HTTPException(status_code=404, detail="Slika nije pronađena")
+
+    was_primary = image.is_primary
+    db.delete(image)
+
+    if was_primary:
+        next_img = db.query(CarImage).filter(CarImage.car_id == car_id).order_by(CarImage.sort_order).first()
+        if next_img:
+            next_img.is_primary = 1
+
+    db.commit()
+
+
+@router.put("/{car_id}/images/{image_id}/primary", response_model=CarResponse)
+def set_primary_image(
+    car_id: int,
+    image_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    car = db.query(Car).filter(Car.id == car_id).first()
+    if not car:
+        raise HTTPException(status_code=404, detail="Oglas nije pronađen")
+    if car.seller_id != current_user.id and not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Nemate dozvolu")
+
+    image = db.query(CarImage).filter(CarImage.id == image_id, CarImage.car_id == car_id).first()
+    if not image:
+        raise HTTPException(status_code=404, detail="Slika nije pronađena")
+
+    db.query(CarImage).filter(CarImage.car_id == car_id).update({"is_primary": 0})
+    image.is_primary = 1
+    db.commit()
+
+    car = db.query(Car).options(
+        joinedload(Car.images),
+        joinedload(Car.seller),
+    ).filter(Car.id == car.id).first()
+    return car
+
+
 @router.post("/{car_id}/images", response_model=CarResponse)
 async def upload_car_images(
     car_id: int,

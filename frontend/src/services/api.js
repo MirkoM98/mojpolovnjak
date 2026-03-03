@@ -40,6 +40,8 @@ export const carsAPI = {
     api.post(`/cars/${id}/images`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
+  deleteImage: (carId, imageId) => api.delete(`/cars/${carId}/images/${imageId}`),
+  setPrimaryImage: (carId, imageId) => api.put(`/cars/${carId}/images/${imageId}/primary`),
 }
 
 export const usersAPI = {

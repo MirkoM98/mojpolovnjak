@@ -3,7 +3,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { carsAPI } from '../services/api'
 import { brands, fuelTypes, transmissions, bodyTypes, colors, locations } from '../data/mockCars'
-import { Upload, X, Save, Loader2 } from 'lucide-react'
+import { Upload, X, Save, Loader2, Star, Trash2 } from 'lucide-react'
 
 const currentYear = new Date().getFullYear()
 const yearOptions = Array.from({ length: 40 }, (_, i) => currentYear - i)
@@ -62,6 +62,24 @@ export default function EditListing() {
 
   const removeNewImage = (index) => setNewImages((prev) => prev.filter((_, i) => i !== index))
 
+  const deleteExistingImage = async (imageId) => {
+    try {
+      await carsAPI.deleteImage(id, imageId)
+      setExistingImages((prev) => prev.filter((img) => img.id !== imageId))
+    } catch {
+      setError('Greška pri brisanju slike')
+    }
+  }
+
+  const setAsThumbnail = async (imageId) => {
+    try {
+      const res = await carsAPI.setPrimaryImage(id, imageId)
+      setExistingImages(res.data.images || [])
+    } catch {
+      setError('Greška pri postavljanju thumbnail-a')
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
@@ -118,9 +136,33 @@ export default function EditListing() {
           <h2 className="font-semibold text-gray-900 mb-4">Fotografije</h2>
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
             {existingImages.map((img) => (
-              <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+              <div key={img.id} className={`relative aspect-square rounded-lg overflow-hidden bg-gray-100 ${img.is_primary ? 'ring-2 ring-primary-500' : ''}`}>
                 <img src={img.image_url} alt="" className="w-full h-full object-cover" />
-                <div className="absolute bottom-1 left-1 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded">Postojeća</div>
+                <div className="absolute inset-0 bg-black/0 hover:bg-black/30 transition-colors group">
+                  <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      onClick={() => setAsThumbnail(img.id)}
+                      className={`p-1 rounded-full border-0 cursor-pointer ${img.is_primary ? 'bg-primary-500 text-white' : 'bg-white/90 text-gray-600 hover:text-primary-600'}`}
+                      title="Postavi kao thumbnail"
+                    >
+                      <Star size={12} fill={img.is_primary ? 'currentColor' : 'none'} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteExistingImage(img.id)}
+                      className="p-1 rounded-full bg-red-500 text-white border-0 cursor-pointer hover:bg-red-600"
+                      title="Obriši sliku"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                </div>
+                {img.is_primary ? (
+                  <div className="absolute bottom-1 left-1 bg-primary-500 text-white text-[10px] px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                    <Star size={8} fill="currentColor" /> Thumbnail
+                  </div>
+                ) : null}
               </div>
             ))}
             {newImages.map((img, i) => (
