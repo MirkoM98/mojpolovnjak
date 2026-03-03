@@ -2,10 +2,17 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from .database import engine, Base
+from .database import engine, Base, SessionLocal
 from .routes import auth, cars, users
+from .seed_data import seed_if_empty
 
 Base.metadata.create_all(bind=engine)
+
+db = SessionLocal()
+try:
+    seed_if_empty(db)
+finally:
+    db.close()
 
 app = FastAPI(
     title="MojPolovnjak API",
@@ -20,6 +27,8 @@ app.add_middleware(
         "http://localhost:5173",
         "https://mojpolovnjak.autos",
         "https://www.mojpolovnjak.autos",
+        "https://mojpolovnjak.vercel.app",
+        "https://mojpolovnjak-*.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
