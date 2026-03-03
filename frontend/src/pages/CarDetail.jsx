@@ -128,6 +128,11 @@ export default function CarDetail() {
                 </>
               )}
               <div className="absolute top-3 right-3 flex gap-2">
+                {canEdit && (
+                  <Link to={`/edit-oglas/${car.id}`} className="p-2.5 rounded-full bg-purple-600 text-white border-0 cursor-pointer hover:bg-purple-700 transition-colors flex items-center justify-center no-underline">
+                    <Pencil size={20} />
+                  </Link>
+                )}
                 <button onClick={() => { if (!user) { navigate('/prijava'); return } toggleFavorite(Number(id)) }} className={`p-2.5 rounded-full backdrop-blur-sm border-0 cursor-pointer ${liked ? 'bg-red-500 text-white' : 'bg-white/90 text-gray-600 hover:text-red-500'}`}>
                   <Heart size={20} fill={liked ? 'currentColor' : 'none'} />
                 </button>
@@ -139,14 +144,7 @@ export default function CarDetail() {
           </div>
 
           <div className="lg:hidden">
-            <div className="flex items-start justify-between gap-3">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">{car.title}</h1>
-              {canEdit && (
-                <Link to={`/edit-oglas/${car.id}`} className="shrink-0 flex items-center gap-1.5 bg-primary-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium no-underline hover:bg-primary-700 transition-colors">
-                  <Pencil size={14} /> Izmeni
-                </Link>
-              )}
-            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{car.title}</h1>
             <p className="text-3xl font-bold text-primary-600 mb-4">{formatPrice(car.price)}</p>
           </div>
 
@@ -190,14 +188,7 @@ export default function CarDetail() {
         <div className="lg:col-span-1">
           <div className="sticky top-20 space-y-4">
             <div className="hidden lg:block bg-white rounded-xl border border-gray-100 p-6">
-              <div className="flex items-start justify-between gap-2">
-                <h1 className="text-xl font-bold text-gray-900 mb-2">{car.title}</h1>
-                {canEdit && (
-                  <Link to={`/edit-oglas/${car.id}`} className="shrink-0 flex items-center gap-1.5 bg-primary-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium no-underline hover:bg-primary-700 transition-colors">
-                    <Pencil size={14} /> Izmeni
-                  </Link>
-                )}
-              </div>
+              <h1 className="text-xl font-bold text-gray-900 mb-2">{car.title}</h1>
               <p className="text-3xl font-bold text-primary-600 mb-1">{formatPrice(car.price)}</p>
               <div className="flex items-center gap-1 text-gray-400 text-sm">
                 <MapPin size={14} />
