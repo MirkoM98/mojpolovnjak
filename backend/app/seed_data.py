@@ -1,63 +1,177 @@
-"""Auto-seed the database if empty. Called on app startup."""
 from sqlalchemy.orm import Session
 from .models.user import User
 from .models.car import Car, CarImage
-from .services.auth import get_password_hash
+from .services.auth import hash_password
 
 
 def seed_if_empty(db: Session):
-    if db.query(User).count() > 0:
+    if db.query(Car).first():
         return
 
-    users = [
-        User(email="marko@example.com", hashed_password=get_password_hash("password123"), name="Marko Petrović", phone="0641234567"),
-        User(email="ana@example.com", hashed_password=get_password_hash("password123"), name="Ana Jovanović", phone="0659876543"),
-        User(email="stefan@example.com", hashed_password=get_password_hash("password123"), name="Stefan Nikolić", phone="0621112233"),
-        User(email="nikola@example.com", hashed_password=get_password_hash("password123"), name="Nikola Đorđević", phone="0634445566"),
-        User(email="jelena@example.com", hashed_password=get_password_hash("password123"), name="Jelena Milić", phone="0647778899"),
-    ]
-    for u in users:
-        db.add(u)
-    db.commit()
-    for u in users:
-        db.refresh(u)
-
-    img = {
-        'BMW': 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&h=400&fit=crop',
-        'Mercedes-Benz': 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=600&h=400&fit=crop',
-        'Audi': 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&h=400&fit=crop',
-        'Volkswagen': 'https://images.unsplash.com/photo-1471444928139-48c5bf5173f8?w=600&h=400&fit=crop',
-        'Toyota': 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=600&h=400&fit=crop',
-        'Skoda': 'https://images.unsplash.com/photo-1622838320237-ea159e72aaea?w=600&h=400&fit=crop',
-        'Opel': 'https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=600&h=400&fit=crop',
-        'Renault': 'https://images.unsplash.com/photo-1600712242805-5f78671b24da?w=600&h=400&fit=crop',
-        'Fiat': 'https://images.unsplash.com/photo-1594950195961-290884e5ae5c?w=600&h=400&fit=crop',
-        'Ford': 'https://images.unsplash.com/photo-1551830820-330a71b99659?w=600&h=400&fit=crop',
-        'Peugeot': 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600&h=400&fit=crop',
-    }
+    demo_user = db.query(User).filter(User.email == "demo@mojpolovnjak.autos").first()
+    if not demo_user:
+        demo_user = User(
+            email="demo@mojpolovnjak.autos",
+            hashed_password=hash_password("demo1234"),
+            name="MojPolovnjak Tim",
+            phone="+381 64 123 4567",
+        )
+        db.add(demo_user)
+        db.flush()
 
     cars_data = [
-        dict(seller_id=users[0].id, brand="BMW", model="320d M Sport", year=2019, price=25000, mileage=85000, fuel="Dizel", transmission="Automatik", horsepower=190, engine_size=2.0, body_type="Limuzina", color="Teget", doors=4, location="Beograd", description="Odlično očuvan BMW 320d sa M Sport paketom. Servisna knjiga, prvi vlasnik u Srbiji.", features="Navigacija,Kožna sedišta,LED farovi,Parking senzori,Tempomat"),
-        dict(seller_id=users[1].id, brand="Mercedes-Benz", model="C220d AMG Line", year=2020, price=32000, mileage=62000, fuel="Dizel", transmission="Automatik", horsepower=194, engine_size=2.0, body_type="Limuzina", color="Srebrna", doors=4, location="Novi Sad", description="Mercedes C klasa sa AMG Line paketom. Burmester zvučnici, panorama krov.", features="AMG Line,Panorama krov,Burmester zvuk,Ambijentalno svetlo,Kamera"),
-        dict(seller_id=users[2].id, brand="Audi", model="A4 2.0 TDI Quattro", year=2018, price=22500, mileage=110000, fuel="Dizel", transmission="Automatik", horsepower=190, engine_size=2.0, body_type="Karavan", color="Crna", doors=5, location="Beograd", description="Audi A4 Avant sa Quattro pogonom. Virtual cockpit, Matrix LED.", features="Quattro pogon,Virtual cockpit,Matrix LED,Bang & Olufsen,Lane assist"),
-        dict(seller_id=users[3].id, brand="Volkswagen", model="Golf 8 1.5 TSI", year=2021, price=23000, mileage=45000, fuel="Benzin", transmission="Manuelni", horsepower=150, engine_size=1.5, body_type="Hečbek", color="Bela", doors=5, location="Kragujevac", description="Novi Golf 8 u odličnom stanju. Digitalna tabla, CarPlay.", features="Digitalna tabla,Apple CarPlay,Android Auto,Adaptivni tempomat"),
-        dict(seller_id=users[4].id, brand="Toyota", model="RAV4 2.5 Hybrid", year=2022, price=38000, mileage=28000, fuel="Hibrid", transmission="Automatik", horsepower=218, engine_size=2.5, body_type="SUV", color="Siva", doors=5, location="Beograd", description="Toyota RAV4 Hybrid sa naprednim paketom bezbednosti.", features="Toyota Safety Sense,JBL zvučnici,Head-up display,360 kamera"),
-        dict(seller_id=users[0].id, brand="Skoda", model="Octavia 2.0 TDI", year=2020, price=19800, mileage=75000, fuel="Dizel", transmission="Automatik", horsepower=150, engine_size=2.0, body_type="Karavan", color="Siva", doors=5, location="Subotica", description="Škoda Octavia Combi sa DSG menjačem.", features="DSG menjač,Virtual cockpit,Canton zvuk,Grejanje sedišta"),
-        dict(seller_id=users[1].id, brand="Opel", model="Astra 1.2 Turbo", year=2022, price=21000, mileage=32000, fuel="Benzin", transmission="Automatik", horsepower=130, engine_size=1.2, body_type="Hečbek", color="Crvena", doors=5, location="Pančevo", description="Nova Opel Astra L sa potpuno novim dizajnom.", features="Vizir kokpit,Matrix LED,Navigacija,Bežično punjenje"),
-        dict(seller_id=users[2].id, brand="Renault", model="Megane 1.3 TCe", year=2019, price=13200, mileage=88000, fuel="Benzin", transmission="Manuelni", horsepower=140, engine_size=1.3, body_type="Hečbek", color="Siva", doors=5, location="Čačak", description="Renault Megane GT Line sa sportskim paketom.", features="GT Line,Bose zvučnici,Panorama krov,Full LED"),
-        dict(seller_id=users[3].id, brand="Fiat", model="500 1.0 Hybrid", year=2021, price=14800, mileage=25000, fuel="Hibrid", transmission="Manuelni", horsepower=70, engine_size=1.0, body_type="Hečbek", color="Bela", doors=3, location="Beograd", description="Sladak Fiat 500 Hybrid, idealan za grad.", features="Apple CarPlay,Android Auto,City brake,Start/Stop"),
-        dict(seller_id=users[4].id, brand="BMW", model="X3 xDrive20d", year=2020, price=42000, mileage=55000, fuel="Dizel", transmission="Automatik", horsepower=190, engine_size=2.0, body_type="SUV", color="Crna", doors=5, location="Novi Sad", description="BMW X3 sa xDrive pogonom. Luxury Line.", features="xDrive,Luxury Line,Koža Vernasca,Panorama krov,Harman Kardon"),
-        dict(seller_id=users[0].id, brand="Ford", model="Focus 1.5 EcoBlue", year=2019, price=14500, mileage=98000, fuel="Dizel", transmission="Manuelni", horsepower=120, engine_size=1.5, body_type="Hečbek", color="Plava", doors=5, location="Niš", description="Ford Focus u odličnom stanju, ekonomičan.", features="SYNC 3,Navigacija,Tempomat,Start/Stop,Parking senzori"),
-        dict(seller_id=users[1].id, brand="Peugeot", model="308 1.5 BlueHDi", year=2022, price=24500, mileage=38000, fuel="Dizel", transmission="Automatik", horsepower=130, engine_size=1.5, body_type="Hečbek", color="Zelena", doors=5, location="Kraljevo", description="Novi Peugeot 308 sa i-Cockpit digitalom.", features="i-Cockpit,Full LED,10 inch ekran,Navigacija,Wireless CarPlay"),
+        {
+            "brand": "Volkswagen",
+            "model": "Golf 7 1.6 TDI",
+            "year": 2018,
+            "price": 14500,
+            "mileage": 132000,
+            "fuel": "Dizel",
+            "transmission": "Manuelni",
+            "horsepower": 115,
+            "engine_size": 1.6,
+            "body_type": "Hečbek",
+            "color": "Siva",
+            "doors": 5,
+            "location": "Beograd",
+            "description": "Volkswagen Golf 7 u odličnom stanju. Redovno servisiran u ovlašćenom servisu, servisna knjižica uredna. Kupljen nov u Srbiji, prvi vlasnik. Zimske i letnje gume na felgama. Registrovan do septembra 2026.",
+            "features": "Klima,Tempomat,Parking senzori,Navigacija,Bluetooth,Start/Stop,LED svetla",
+            "image": "https://images.unsplash.com/photo-1622659889966-c4e570e12b53?w=800",
+        },
+        {
+            "brand": "BMW",
+            "model": "320d F30",
+            "year": 2016,
+            "price": 17900,
+            "mileage": 178000,
+            "fuel": "Dizel",
+            "transmission": "Automatik",
+            "horsepower": 190,
+            "engine_size": 2.0,
+            "body_type": "Limuzina",
+            "color": "Crna",
+            "doors": 4,
+            "location": "Novi Sad",
+            "description": "BMW 320d sa M paketom opreme, automatski menjač, koža enterijer. Dva ključa, svi servisi radjeni. Bez ulaganja, moguća zamena uz doplatu.",
+            "features": "Koža,M paket,Xenon,Navigacija,Grejanje sedišta,Automatska klima,Tempomat,Parking senzori",
+            "image": "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800",
+        },
+        {
+            "brand": "Audi",
+            "model": "A4 2.0 TDI",
+            "year": 2019,
+            "price": 22500,
+            "mileage": 95000,
+            "fuel": "Dizel",
+            "transmission": "Automatik",
+            "horsepower": 150,
+            "engine_size": 2.0,
+            "body_type": "Karavan",
+            "color": "Bela",
+            "doors": 5,
+            "location": "Niš",
+            "description": "Audi A4 Avant u perfektnom stanju. S-Tronic automatski menjač, virtuelni kokpit, Matrix LED svetla. Uvezen iz Nemačke, ocarinjen i registrovan.",
+            "features": "Virtuelni kokpit,Matrix LED,Navigacija,Automatska klima,Tempomat,Parking senzori,Kamera,Keyless",
+            "image": "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800",
+        },
+        {
+            "brand": "Mercedes-Benz",
+            "model": "C 220d W205",
+            "year": 2017,
+            "price": 23000,
+            "mileage": 145000,
+            "fuel": "Dizel",
+            "transmission": "Automatik",
+            "horsepower": 170,
+            "engine_size": 2.1,
+            "body_type": "Limuzina",
+            "color": "Teget",
+            "doors": 4,
+            "location": "Beograd",
+            "description": "Mercedes C klasa u Avantgarde paketu opreme. 9G-Tronic automatski menjač, koža/alcantara enterijer. Garažiran, nema tragova korozije.",
+            "features": "Avantgarde,9G-Tronic,Koža,LED svetla,Navigacija,Grejanje sedišta,Tempomat,Parking senzori",
+            "image": "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800",
+        },
+        {
+            "brand": "Škoda",
+            "model": "Octavia 1.6 TDI",
+            "year": 2020,
+            "price": 16800,
+            "mileage": 68000,
+            "fuel": "Dizel",
+            "transmission": "Manuelni",
+            "horsepower": 115,
+            "engine_size": 1.6,
+            "body_type": "Karavan",
+            "color": "Siva",
+            "doors": 5,
+            "location": "Kragujevac",
+            "description": "Škoda Octavia Combi, Style paket opreme. Kupljena nova u Srbiji, servisirana u ovlašćenom servisu. Fabričko stanje, bez ikakvog ulaganja.",
+            "features": "Klima,Tempomat,Parking senzori,Navigacija,LED svetla,Bluetooth,Android Auto,Apple CarPlay",
+            "image": "https://images.unsplash.com/photo-1632038229898-1f862020be71?w=800",
+        },
+        {
+            "brand": "Toyota",
+            "model": "Corolla 1.8 Hybrid",
+            "year": 2021,
+            "price": 21000,
+            "mileage": 42000,
+            "fuel": "Hibrid",
+            "transmission": "Automatik",
+            "horsepower": 122,
+            "engine_size": 1.8,
+            "body_type": "Hečbek",
+            "color": "Bela",
+            "doors": 5,
+            "location": "Beograd",
+            "description": "Toyota Corolla Hybrid sa minimalnom potrošnjom goriva (4.2l/100km). Kupljena nova kod ovlašćenog dilera, pod garancijom do 2026. Kao nova.",
+            "features": "Hibridni pogon,Toyota Safety Sense,Adaptivni tempomat,LED svetla,Kamera,Navigacija,Keyless",
+            "image": "https://images.unsplash.com/photo-1623869675781-80aa31012a5a?w=800",
+        },
+        {
+            "brand": "Renault",
+            "model": "Clio 1.5 dCi",
+            "year": 2019,
+            "price": 10500,
+            "mileage": 87000,
+            "fuel": "Dizel",
+            "transmission": "Manuelni",
+            "horsepower": 85,
+            "engine_size": 1.5,
+            "body_type": "Hečbek",
+            "color": "Crvena",
+            "doors": 5,
+            "location": "Subotica",
+            "description": "Renault Clio u odličnom stanju, ekonomičan za grad i otvoreni put. Klima, multimedija sa ekranom na dodir. Registrovan do marta 2027.",
+            "features": "Klima,Ekran na dodir,Bluetooth,USB,Tempomat,Dnevna LED svetla,Maglenke",
+            "image": "https://images.unsplash.com/photo-1601929862217-f1175f0bfc23?w=800",
+        },
+        {
+            "brand": "Fiat",
+            "model": "500 1.2",
+            "year": 2017,
+            "price": 7900,
+            "mileage": 62000,
+            "fuel": "Benzin",
+            "transmission": "Manuelni",
+            "horsepower": 69,
+            "engine_size": 1.2,
+            "body_type": "Hečbek",
+            "color": "Plava",
+            "doors": 3,
+            "location": "Novi Sad",
+            "description": "Slatki Fiat 500 idealan za grad. Mala potrošnja, lak za parkiranje. Panorama krov, klima, city mode. Ženske ruke, garažiran.",
+            "features": "Panorama krov,Klima,City mode,Bluetooth,Električni prozori,Centralno zaključavanje",
+            "image": "https://images.unsplash.com/photo-1595787572734-fae6e689d2eb?w=800",
+        },
     ]
 
     for car_data in cars_data:
-        car = Car(**car_data)
+        image_url = car_data.pop("image")
+        car = Car(seller_id=demo_user.id, **car_data)
         db.add(car)
-        db.commit()
-        db.refresh(car)
-        car_img = CarImage(car_id=car.id, image_url=img.get(car.brand, img['Peugeot']), is_primary=1, sort_order=0)
-        db.add(car_img)
+        db.flush()
+        db.add(CarImage(car_id=car.id, image_url=image_url, is_primary=1, sort_order=0))
 
     db.commit()
-    print(f"Seeded {len(users)} users and {len(cars_data)} cars.")
+    print(f"[SEED] Dodato {len(cars_data)} automobila u bazu.")
