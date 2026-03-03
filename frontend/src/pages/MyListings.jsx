@@ -47,14 +47,28 @@ export default function MyListings() {
       ) : listings.length > 0 ? (
         <div className="space-y-4">
           {listings.map((car) => (
-            <div key={car.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden flex flex-col sm:flex-row">
-              <div className="sm:w-48 h-40 sm:h-auto shrink-0">
-                <img src={car.images[0] || 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600&h=400&fit=crop'} alt={car.title} className="w-full h-full object-cover" />
+            <div key={car.id} className={`bg-white rounded-xl border overflow-hidden flex flex-col sm:flex-row ${car.status === 'sold' ? 'border-red-200' : car.status === 'reserved' ? 'border-amber-200' : 'border-gray-100'}`}>
+              <div className="sm:w-48 h-40 sm:h-auto shrink-0 relative">
+                <img src={car.images[0] || 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600&h=400&fit=crop'} alt={car.title} className={`w-full h-full object-cover ${car.status === 'sold' ? 'grayscale opacity-70' : ''}`} />
+                {car.status === 'sold' && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                    <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-md uppercase">Prodato</span>
+                  </div>
+                )}
+                {car.status === 'reserved' && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                    <span className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-md uppercase">Rezervisano</span>
+                  </div>
+                )}
               </div>
               <div className="p-4 flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <h3 className="font-semibold text-gray-900 m-0">{car.title}</h3>
-                  <p className="text-xl font-bold text-primary-600 mt-1 mb-2">{formatPrice(car.price)}</p>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-gray-900 m-0">{car.title}</h3>
+                    {car.status === 'reserved' && <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-amber-100 text-amber-700">Rezervisan</span>}
+                    {car.status === 'sold' && <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-red-100 text-red-700">Prodat</span>}
+                  </div>
+                  <p className={`text-xl font-bold mt-1 mb-2 ${car.status === 'sold' ? 'text-gray-400 line-through' : 'text-primary-600'}`}>{formatPrice(car.price)}</p>
                   <div className="flex gap-4 text-sm text-gray-500">
                     <span>{car.year}.</span>
                     <span>{formatMileage(car.mileage)}</span>
