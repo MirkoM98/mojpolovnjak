@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { SlidersHorizontal, ArrowUpDown, Loader2 } from 'lucide-react'
+import { SlidersHorizontal, ArrowUpDown, Loader2, AlertTriangle } from 'lucide-react'
 import CarCard from '../components/cars/CarCard'
 import FilterSidebar from '../components/cars/FilterSidebar'
 import SearchBar from '../components/cars/SearchBar'
@@ -40,11 +40,13 @@ export default function CarListing() {
   const [cars, setCars] = useState([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const [page, setPage] = useState(1)
   const [hasNext, setHasNext] = useState(false)
 
   const fetchCars = useCallback(async () => {
     setLoading(true)
+    setError(false)
     try {
       const params = { page, page_size: 12, sort, search: search || undefined }
       if (filters.brand) params.brand = filters.brand
@@ -66,6 +68,7 @@ export default function CarListing() {
     } catch {
       setCars([])
       setTotal(0)
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -123,6 +126,15 @@ export default function CarListing() {
           {loading ? (
             <div className="flex justify-center py-16">
               <Loader2 size={32} className="animate-spin text-primary-600" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-16">
+              <AlertTriangle size={48} className="text-amber-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Greška pri učitavanju vozila</h3>
+              <p className="text-gray-500 text-sm mb-4">Server trenutno nije dostupan. Pokušajte ponovo.</p>
+              <button onClick={fetchCars} className="text-primary-600 font-medium text-sm bg-transparent border-0 cursor-pointer hover:text-primary-700">
+                Pokušaj ponovo
+              </button>
             </div>
           ) : cars.length > 0 ? (
             <>

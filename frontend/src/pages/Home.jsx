@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, Shield, TrendingUp, Users, ArrowRight, Car, Star, Loader2 } from 'lucide-react'
+import { Search, Shield, TrendingUp, Users, ArrowRight, Car, Star, Loader2, AlertTriangle } from 'lucide-react'
 import CarCard from '../components/cars/CarCard'
 import { carsAPI } from '../services/api'
 import { normalizeCars } from '../utils/normalize'
@@ -33,12 +33,13 @@ const features = [
 export default function Home() {
   const [featuredCars, setFeaturedCars] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
   const popularBrands = allBrands.slice(0, 8)
 
   useEffect(() => {
     carsAPI.list({ page_size: 6, sort: 'newest' })
       .then((res) => setFeaturedCars(normalizeCars(res.data.cars)))
-      .catch(() => {})
+      .catch(() => setError(true))
       .finally(() => setLoading(false))
   }, [])
 
@@ -130,11 +131,26 @@ export default function Home() {
             <div className="flex justify-center py-12">
               <Loader2 size={32} className="animate-spin text-primary-600" />
             </div>
-          ) : (
+          ) : error ? (
+            <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
+              <AlertTriangle size={48} className="text-amber-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Greška pri učitavanju vozila</h3>
+              <p className="text-gray-500 text-sm">Pokušajte ponovo kasnije ili osvežite stranicu</p>
+            </div>
+          ) : featuredCars.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredCars.map((car) => (
                 <CarCard key={car.id} car={car} />
               ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
+              <Car size={48} className="text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Još nema oglasa</h3>
+              <p className="text-gray-500 text-sm mb-4">Budite prvi koji će postaviti oglas!</p>
+              <Link to="/novi-oglas" className="text-primary-600 font-medium no-underline hover:text-primary-700">
+                Postavi oglas
+              </Link>
             </div>
           )}
         </div>
