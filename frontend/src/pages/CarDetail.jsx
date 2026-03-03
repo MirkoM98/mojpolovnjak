@@ -19,8 +19,21 @@ export default function CarDetail() {
   const [loading, setLoading] = useState(true)
   const [showPhone, setShowPhone] = useState(false)
   const [currentImage, setCurrentImage] = useState(0)
+  const [slideDir, setSlideDir] = useState(0)
+  const [animating, setAnimating] = useState(false)
   const [similarCars, setSimilarCars] = useState([])
   const liked = isFavorite(Number(id))
+
+  const goToImage = (direction) => {
+    if (animating || !car) return
+    setSlideDir(direction)
+    setAnimating(true)
+    setTimeout(() => {
+      setCurrentImage((p) => (p + direction + car.images.length) % car.images.length)
+      setSlideDir(0)
+      setAnimating(false)
+    }, 250)
+  }
 
   useEffect(() => {
     setLoading(true)
@@ -84,16 +97,33 @@ export default function CarDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-            <div className="relative aspect-[16/10] bg-gray-100">
-              <img src={mainImage} alt={car.title} className="w-full h-full object-cover" />
+            <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden">
+              <img
+                src={mainImage}
+                alt={car.title}
+                className="w-full h-full object-cover transition-all duration-250 ease-in-out"
+                style={{
+                  transform: slideDir !== 0 ? `translateX(${slideDir > 0 ? '-100' : '100'}%)` : 'translateX(0)',
+                  opacity: slideDir !== 0 ? 0 : 1,
+                }}
+              />
               {car.images.length > 1 && (
                 <>
-                  <button onClick={() => setCurrentImage((p) => (p - 1 + car.images.length) % car.images.length)} className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow-md border-0 cursor-pointer hover:bg-white">
+                  <button onClick={() => goToImage(-1)} className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow-md border-0 cursor-pointer hover:bg-white hover:scale-110 transition-transform">
                     <ChevronLeft size={20} />
                   </button>
-                  <button onClick={() => setCurrentImage((p) => (p + 1) % car.images.length)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow-md border-0 cursor-pointer hover:bg-white">
+                  <button onClick={() => goToImage(1)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 p-2 rounded-full shadow-md border-0 cursor-pointer hover:bg-white hover:scale-110 transition-transform">
                     <ChevronRight size={20} />
                   </button>
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                    {car.images.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { if (i !== currentImage) { setSlideDir(i > currentImage ? 1 : -1); setAnimating(true); setTimeout(() => { setCurrentImage(i); setSlideDir(0); setAnimating(false) }, 250) } }}
+                        className={`w-2 h-2 rounded-full border-0 cursor-pointer transition-all duration-200 ${i === currentImage ? 'bg-white w-6' : 'bg-white/50 hover:bg-white/80'}`}
+                      />
+                    ))}
+                  </div>
                 </>
               )}
               <div className="absolute top-3 right-3 flex gap-2">
