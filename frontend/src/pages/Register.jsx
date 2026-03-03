@@ -36,11 +36,17 @@ export default function Register() {
       return
     }
 
+    const cleanPhone = form.phone.replace(/[^\d+\s-]/g, '').trim()
+    if (form.phone && !cleanPhone.match(/^[+]?\d[\d\s-]{5,}$/)) {
+      setError('Unesite validan broj telefona')
+      return
+    }
+
     setSubmitting(true)
     const result = await register({
       name: form.name,
-      email: form.email,
-      phone: form.phone || null,
+      email: form.email.toLowerCase().trim(),
+      phone: cleanPhone || null,
       password: form.password,
     })
     setSubmitting(false)
@@ -100,7 +106,7 @@ export default function Register() {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Telefon</label>
               <div className="relative">
                 <Phone size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input type="tel" value={form.phone} onChange={(e) => updateField('phone', e.target.value)} placeholder="064 123 4567" className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100" />
+                <input type="tel" value={form.phone} onChange={(e) => updateField('phone', e.target.value.replace(/[^\d+\s-]/g, ''))} placeholder="064 123 4567" className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100" />
               </div>
             </div>
 

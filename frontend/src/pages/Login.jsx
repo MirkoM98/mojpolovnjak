@@ -21,7 +21,7 @@ export default function Login() {
     }
 
     setSubmitting(true)
-    const result = await login(form.email, form.password)
+    const result = await login(form.email.toLowerCase().trim(), form.password)
     setSubmitting(false)
 
     if (result.success) {
